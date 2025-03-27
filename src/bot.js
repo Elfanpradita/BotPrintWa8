@@ -43,6 +43,17 @@ async function startBot() {
         const sender = msg.key.remoteJid;
         const msgType = Object.keys(msg.message)[0];
 
+        // ✅ Fitur Ping-Pong
+        if (msgType === "conversation" || msgType === "extendedTextMessage") {
+            const text = msg.message.conversation || msg.message.extendedTextMessage.text;
+            
+            if (text.toLowerCase() === "ping") {
+                sock.sendMessage(sender, { text: "Pong! 🏓" });
+                return;
+            }
+        }
+
+        // ✅ Print File (PDF/Gambar)
         if (msgType === "imageMessage" || msgType === "documentMessage") {
             try {
                 console.log(`📥 Menerima file dari ${sender}...`);
@@ -58,7 +69,7 @@ async function startBot() {
                 writeFileSync(filePath, buffer);
                 console.log(`✅ File berhasil disimpan: ${filePath}`);
 
-                // Cetak dokumen dan kirim notifikasi ke pengirim
+                // Cetak dokumen dan kirim notifikasi ke user
                 printFile(filePath, config.printerName)
                     .then(() => {
                         sock.sendMessage(sender, { text: `✅ Dokumen berhasil dicetak: ${fileName}` });
